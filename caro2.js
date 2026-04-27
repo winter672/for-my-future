@@ -34,7 +34,7 @@ app.get("/", (req, res) => {
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tic-Tac-Toe</title>
+  <title>XO GANE </title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
   <script src="/socket.io/socket.io.js"></script>
   <style>
