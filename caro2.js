@@ -9,7 +9,7 @@ const server = http.createServer(app);
 const io = new Server(server);
  
 // ===== DB =====
-mongoose.connectmongoose.connect(process.env.MONGO_URI);
+mongoose.connect(process.env.MONGO_URI);
 const User = mongoose.model("User", new mongoose.Schema({
   username: String,
   score: { type: Number, default: 0 }
