@@ -14,7 +14,7 @@ app.use(express.json());
 const sessionMiddleware = session({
   secret: 'secret',
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false
 });
 
 app.use(sessionMiddleware);
@@ -24,8 +24,8 @@ io.use((socket, next) => {
   sessionMiddleware(socket.request, {}, next);
 });
 
-// ===== CONNECT ATLAS (แก้ตรงนี้) =====
-mongoose.connect('mongodb+srv://USERNAME:PASSWORD@cluster0.xxxxx.mongodb.net/caro')
+// ===== CONNECT DB (ใช้ ENV) =====
+mongoose.connect(process.env.MONGO_URI)
 .then(()=>console.log("DB connected"))
 .catch(err=>console.log(err));
 
@@ -168,7 +168,7 @@ io.on("connection", (socket) => {
     socket.join(room);
 
     if (!rooms[room]) rooms[room]=[];
-    if (rooms[room].length >= 2) return; // กันเกิน 2 คน
+    if (rooms[room].length >= 2) return;
 
     rooms[room].push(socket.id);
 
@@ -207,9 +207,16 @@ io.on("connection", (socket) => {
     io.emit("score", list);
   });
 
+  // ✅ กันหลุดแล้วค้าง
+  socket.on("disconnect", () => {
+    for (let room in rooms) {
+      rooms[room] = rooms[room].filter(id => id !== socket.id);
+    }
+  });
+
 });
 
-// ===== PORT (สำคัญมากสำหรับ deploy) =====
+// ===== PORT =====
 const PORT = process.env.PORT || 3000;
 
 http.listen(PORT, ()=>{
