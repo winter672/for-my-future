@@ -344,7 +344,7 @@ app.get("/", (req, res) => {
 </head>
 <body>
   <div class="container">
-    <h1>TIC·TAC·TOE</h1>
+    <h1>XO GAME </h1>
  
     <div class="join-area">
       <input id="room" placeholder="ROOM ID" />
