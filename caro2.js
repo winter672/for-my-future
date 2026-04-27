@@ -22,7 +22,7 @@ io.use((socket, next) => {
   sessionMiddleware(socket.request, {}, next);
 });
 
-// ===== CONNECT DB =====
+// ===== DB =====
 mongoose.connect(process.env.MONGO_URI)
 .then(()=>console.log("DB connected"))
 .catch(err=>console.log(err));
@@ -36,7 +36,7 @@ const User = mongoose.model('User', {
 
 let rooms = {};
 
-// ===== LOGIN PAGE =====
+// ===== LOGIN =====
 app.get('/', (req, res) => {
   res.send(`
   <h2>Login</h2>
@@ -48,7 +48,7 @@ app.get('/', (req, res) => {
   `);
 });
 
-// ===== LOGIN =====
+// ===== LOGIN POST =====
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -68,12 +68,11 @@ app.post('/login', async (req, res) => {
     res.redirect('/game');
 
   } catch (err) {
-    console.log(err);
-    res.send("ERROR: " + err.message);
+    res.send("ERROR");
   }
 });
 
-// ===== GAME PAGE =====
+// ===== GAME =====
 app.get('/game', (req, res) => {
   if (!req.session.user) return res.redirect('/');
 
@@ -88,59 +87,55 @@ app.get('/game', (req, res) => {
 body {
   margin: 0;
   font-family: 'Segoe UI';
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  background: radial-gradient(circle, #0f2027, #203a43);
   color: white;
   text-align: center;
 }
 
-h1 { text-shadow: 0 0 10px cyan; }
+h1 { text-shadow: 0 0 15px cyan; }
 
-input {
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-}
-
-button {
+input, button {
   padding: 10px;
   border-radius: 10px;
   border: none;
-  background: cyan;
+  margin: 5px;
+}
+
+button {
+  background: linear-gradient(45deg, cyan, blue);
+  color: white;
   cursor: pointer;
 }
 
 #board {
   display: grid;
-  grid-template-columns: repeat(3, 100px);
+  grid-template-columns: repeat(3, 90px);
   gap: 10px;
   justify-content: center;
   margin-top: 20px;
 }
 
 .cell {
-  width: 100px;
-  height: 100px;
-  font-size: 40px;
+  width: 90px;
+  height: 90px;
+  font-size: 35px;
   background: #111;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.cell:hover {
-  box-shadow: 0 0 10px cyan;
+  border-radius: 15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
 }
 </style>
-
 </head>
+
 <body>
 
 <h1>🎮 CARO ONLINE</h1>
 
 <input id="room" placeholder="Room Code">
 <button onclick="join()">Join</button>
+<button onclick="restartGame()">🔄 Restart</button>
 
 <h3 id="status"></h3>
 <div id="board"></div>
@@ -157,11 +152,18 @@ let mySymbol="";
 let board=["","","","","","","","",""];
 let current="X";
 
+// ===== JOIN =====
 function join(){
   room=document.getElementById("room").value;
   socket.emit("joinRoom", room);
 }
 
+// ===== RESTART =====
+function restartGame(){
+  socket.emit("restart", room);
+}
+
+// ===== SOCKET =====
 socket.on("start",(symbol)=>{
   mySymbol=symbol;
   draw();
@@ -174,14 +176,24 @@ socket.on("play",(d)=>{
   check();
 });
 
+socket.on("restart",()=>{
+  board=["","","","","","","","",""];
+  current="X";
+  draw();
+});
+
+// ===== PLAY =====
 function play(i){
   if(board[i]||current!==mySymbol)return;
+
   board[i]=mySymbol;
   socket.emit("play",{room,i,s:mySymbol});
+
   draw();
   check();
 }
 
+// ===== DRAW =====
 function draw(){
   let html="";
   for(let i=0;i<9;i++){
@@ -191,8 +203,10 @@ function draw(){
   document.getElementById("board").innerHTML=html;
 }
 
+// ===== CHECK WIN =====
 function check(){
   const w=[[0,1,2],[3,4,5],[6,7,8],[0,4,8],[2,4,6]];
+
   for(let p of w){
     if(board[p[0]] && board[p[0]]===board[p[1]] && board[p[1]]===board[p[2]]){
       socket.emit("win",room);
@@ -200,6 +214,7 @@ function check(){
   }
 }
 
+// ===== SCORE =====
 socket.on("score",(list)=>{
   let html="";
   list.forEach(u=>{
@@ -225,9 +240,9 @@ io.on("connection",(socket)=>{
 
     rooms[room].push(socket.id);
 
-    if(rooms[room].length===1)
+    if(rooms[room].length===1){
       socket.emit("start","X");
-    else{
+    } else {
       socket.emit("start","O");
       socket.to(room).emit("start","X");
     }
@@ -235,6 +250,11 @@ io.on("connection",(socket)=>{
 
   socket.on("play",(d)=>{
     socket.to(d.room).emit("play",d);
+  });
+
+  // ===== RESTART =====
+  socket.on("restart",(room)=>{
+    io.to(room).emit("restart");
   });
 
   socket.on("win", async (room)=>{
