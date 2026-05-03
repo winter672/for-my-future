@@ -40,7 +40,7 @@ app.post("/register", async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.json({ ok: false, msg: "Please fill in all fields" });
     const exists = await User.findOne({ username });
-    if (exists) return res.json({ ok: false, msg: "Username already taken" });
+    if (exists) return res.json({ ok: false, msg: "ชื่อนี้ถูกใช้แล้ว" });
     const hash = await bcrypt.hash(password, 10);
     await User.create({ username, password: hash });
     res.json({ ok: true });
@@ -55,11 +55,11 @@ app.post("/login", async (req, res) => {
     const user = await User.findOne({ username });
     if (!user) return res.json({ ok: false, msg: "User not found" });
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.json({ ok: false, msg: "Incorrect password" });
+    if (!match) return res.json({ ok: false, msg: "Incorrect password!" });
     req.session.user = username;
     res.json({ ok: true, username });
   } catch (e) {
-    res.json({ ok: false, msg: "An error occurred" });
+    res.json({ ok: false, msg: "An error occurred!" });
   }
 });
 
@@ -75,7 +75,7 @@ app.get("/me", (req, res) => {
 // ===== SERVE HTML =====
 app.get("/", (req, res) => {
   res.send(`<!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -426,63 +426,63 @@ app.get("/", (req, res) => {
 <!-- TOPBAR (hidden until logged in) -->
 <div class="topbar" id="topbar" style="display:none">
   <div class="topbar-user">Player: <span id="topbarUser"></span></div>
-  <button class="btn sm o" onclick="logout()">Log out</button>
+  <button class="btn sm o" onclick="logout()">LOGOUT</button>
 </div>
 
 <!-- ════ PAGE: LOGIN / REGISTER ════ -->
 <div class="page active" id="pageAuth">
   <div class="logo">XO ARENA</div>
-  <div class="tagline">Multiplayer · Real-time · Strategy</div>
+  <div class="tagline">MULTIPLAYER · REAL-TIME · STRATEGY</div>
 
   <!-- LOGIN FORM -->
   <div class="card" id="loginCard">
-    <div class="card-title">— Sign In —</div>
-    <div class="field"><label>Username</label><input id="loginUser" placeholder="your_name"/></div>
-    <div class="field"><label>Password</label><input id="loginPass" type="password" placeholder="••••••"/></div>
-    <button class="btn" onclick="doLogin()">Sign in</button>
+    <div class="card-title">— SIGN IN —</div>
+    <div class="field"><label>USERNAME</label><input id="loginUser" placeholder="your_name"/></div>
+    <div class="field"><label>PASSWORD</label><input id="loginPass" type="password" placeholder="••••••"/></div>
+    <button class="btn" onclick="doLogin()">ENTER ARENA</button>
     <div class="msg" id="loginMsg"></div>
-    <div class="switch-link">No account yet? <span onclick="showRegister()">Register here</span></div>
+    <div class="switch-link">Don’t have an account? <span onclick="showRegister()">Sign up</span></div>
   </div>
 
   <!-- REGISTER FORM -->
   <div class="card" id="registerCard" style="display:none">
-    <div class="card-title">— Create Account —</div>
-    <div class="field"><label>Username</label><input id="regUser" placeholder="your_name"/></div>
-    <div class="field"><label>Password</label><input id="regPass" type="password" placeholder="••••••"/></div>
-    <div class="field"><label>Confirm password</label><input id="regPass2" type="password" placeholder="••••••"/></div>
-    <button class="btn" onclick="doRegister()">Create account</button>
+    <div class="card-title">— REGISTER —</div>
+    <div class="field"><label>USERNAME</label><input id="regUser" placeholder="your_name"/></div>
+    <div class="field"><label>PASSWORD</label><input id="regPass" type="password" placeholder="••••••"/></div>
+    <div class="field"><label>CONFIRM PASSWORD</label><input id="regPass2" type="password" placeholder="••••••"/></div>
+    <button class="btn" onclick="doRegister()">CREATE ACCOUNT</button>
     <div class="msg" id="regMsg"></div>
-    <div class="switch-link">Already have an account? <span onclick="showLogin()">Sign in</span></div>
+    <div class="switch-link">มีบัญชีแล้ว? <span onclick="showLogin()">เข้าสู่ระบบ</span></div>
   </div>
 </div>
 
 <!-- ════ PAGE: MODE SELECT ════ -->
 <div class="page" id="pageMode" style="padding-top:64px">
   <div class="logo">XO ARENA</div>
-  <div class="tagline">Select your battlefield</div>
+  <div class="tagline">SELECT YOUR BATTLEFIELD</div>
 
   <div class="mode-grid">
     <div class="mode-card" onclick="selectMode(3,3)">
       <div class="mode-size">3×3</div>
-      <div class="mode-label">Classic</div>
-      <div class="mode-win">Win in 3</div>
+      <div class="mode-label">CLASSIC</div>
+      <div class="mode-win">ชนะ 3 แถว</div>
     </div>
     <div class="mode-card" onclick="selectMode(9,5)">
       <div class="mode-size">9×9</div>
-      <div class="mode-label">Advanced</div>
-      <div class="mode-win">Win in 5</div>
+      <div class="mode-label">ADVANCED</div>
+      <div class="mode-win">ชนะ 5 แถว</div>
     </div>
     <div class="mode-card" onclick="selectMode(16,5)">
       <div class="mode-size">16×16</div>
-      <div class="mode-label">Epic</div>
-      <div class="mode-win">Win in 5</div>
+      <div class="mode-label">EPIC</div>
+      <div class="mode-win">ชนะ 5 แถว</div>
     </div>
   </div>
 
   <div class="card" style="max-width:320px">
-    <div class="card-title">— Join a Room —</div>
-    <div class="field"><label>Room name</label><input id="roomInput" placeholder="Enter room name"/></div>
-    <button class="btn" id="joinBtn" onclick="joinRoom()" disabled>Join / Create room</button>
+    <div class="card-title">— JOIN ROOM —</div>
+    <div class="field"><label>ROOM ID</label><input id="roomInput" placeholder="ใส่ชื่อห้อง"/></div>
+    <button class="btn" id="joinBtn" onclick="joinRoom()" disabled>JOIN / CREATE ROOM</button>
     <div class="msg" id="modeMsg"></div>
   </div>
 
@@ -494,24 +494,24 @@ app.get("/", (req, res) => {
 
   <div class="lobby-info">
     <div class="chip">Room: <span id="roomLabel"></span></div>
-    <div class="chip">Mode: <span id="modeLabel"></span></div>
-    <div class="chip">You are: <span id="symbolLabel"></span></div>
+    <div class="chip">>Mode: <span id="modeLabel"></span></div>
+    <div class="chip">You’re: <span id="symbolLabel"></span></div>
   </div>
 
-  <div id="status">Waiting for opponent...</div>
+  <div id="status">WAITING FOR OPPONENT...</div>
 
   <div id="boardWrapper">
     <div id="board"></div>
   </div>
 
   <div id="expandPanel" style="display:none">
-    <div class="expand-title">⚠ Board is full — Choose a direction to expand</div>
+    <div class="expand-title">⚠ BOARD FULL — CHOOSE EXPANSION DIRECTION</div>
     <div class="expand-btns" id="expandBtns"></div>
   </div>
 
   <div class="game-controls">
-    <button class="btn sm o" onclick="goBack()">← Back</button>
-    <button class="btn sm gold" onclick="restartGame()">Restart</button>
+    <button class="btn sm o" onclick="goBack()">← BACK</button>
+    <button class="btn sm gold" onclick="restartGame()">RESTART</button>
   </div>
 
   <div id="scoreBoard2" style="margin-top:12px; background:var(--surf2); border:1px solid var(--border); border-radius:8px; padding:12px 20px; font-size:0.8rem; line-height:2; min-width:180px; text-align:center; color:var(--dim);">
@@ -576,7 +576,7 @@ async function doRegister() {
   const r = await fetch("/register",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({username,password}) });
   const d = await r.json();
   if (d.ok) {
-    setMsg(msg,"Account created! You can now sign in.","ok");
+    setMsg(msg,"Registration successful! You can now log in","ok");
     setTimeout(showLogin, 1500);
   } else {
     setMsg(msg, d.msg, "err");
@@ -600,12 +600,12 @@ function selectMode(size, win) {
   document.querySelectorAll(".mode-card").forEach(c => c.style.borderColor = "");
   event.currentTarget.style.borderColor = "var(--x)";
   document.getElementById("joinBtn").disabled = false;
-  setMsg(document.getElementById("modeMsg"), `Selected ${size}×${size} — Win in ${win}`, "ok");
+  setMsg(document.getElementById("modeMsg"), \`Select \${size}×\${size} — Win \${win} Row\`, "ok");
 }
 
 function joinRoom() {
   room = document.getElementById("roomInput").value.trim();
-  if (!room) return setMsg(document.getElementById("modeMsg"),"Please enter a room name","err");
+  if (!room) return setMsg(document.getElementById("modeMsg"),"Enter a room name","err");
   boardSize = selectedSize;
   winLen    = selectedWin;
   socket.emit("joinRoom", { room, boardSize, winLen, username: myUser });
@@ -640,7 +640,7 @@ socket.on("start", (data) => {
 
   showPage("pageGame");
   document.getElementById("expandPanel").style.display = "none";
-  setStatus("Your turn");
+  setStatus("YOUR TURN");
   draw();
 });
 
@@ -649,7 +649,7 @@ socket.on("play", (d) => {
   current = d.s === "X" ? "O" : "X";
   drawWithPop(d.i);
   check();
-  if (!gameOver) setStatus("Your turn");
+  if (!gameOver) setStatus("YOUR TURN");
 });
 
 socket.on("expand", (data) => {
@@ -661,7 +661,7 @@ socket.on("expand", (data) => {
   document.getElementById("expandPanel").style.display = "none";
   document.getElementById("modeLabel").textContent = \`\${boardSize}×\${boardSize}\`;
   draw();
-  setStatus(current === mySymbol ? "Your turn" : "Opponent's turn");
+  setStatus(current === mySymbol ? "YOUR TURN" : "OPPONENT'S TURN");
 });
 
 socket.on("restart", () => {
@@ -672,7 +672,7 @@ socket.on("restart", () => {
   document.getElementById("expandPanel").style.display = "none";
   document.getElementById("winOverlay")?.remove();
   document.getElementById("drawOverlay")?.remove();
-  setStatus("Your turn");
+  setStatus("YOUR TURN");
   draw();
 });
 
@@ -687,7 +687,7 @@ function play(i) {
   socket.emit("play", { room, i, s: mySymbol });
   drawWithPop(i);
   check();
-  if (!gameOver) setStatus("Opponent's turn");
+  if (!gameOver) setStatus("OPPONENT'S TURN");
 }
 
 // ── DRAW ──
@@ -777,7 +777,7 @@ function check() {
     } else {
       waitingExpand = true;
       gameOver = false;
-      setStatus("Opponent is choosing how to expand...");
+      setStatus("OPPONENT IS CHOOSING EXPANSION...");
     }
   }
 }
@@ -797,7 +797,7 @@ function showExpandPanel() {
   ];
 
   btns.innerHTML = directions.map(d =>
-    `<button class="btn sm gold" onclick="expand('${d.dir}')">${d.label}</button>`
+    \`<button class="btn sm gold" onclick="expand('\${d.dir}')">\${d.label}</button>\`
   ).join("");
 
   setStatus("Choose a direction to expand the board");
@@ -806,7 +806,7 @@ function showExpandPanel() {
 function expand(dir) {
   socket.emit("expand", { room, dir, boardSize, board });
   document.getElementById("expandPanel").style.display = "none";
-  setStatus("Expanding board...");
+  setStatus("EXPANDING...");
 }
 
 // ── WIN HIGHLIGHT ──
@@ -829,7 +829,7 @@ function showWinOverlay(winner) {
       <div class="particles" id="pCont"></div>
       <div class="win-symbol" style="color:\${color};text-shadow:0 0 30px \${glow},0 0 60px \${glow}40">\${winner}</div>
       <div class="win-label">WINS!</div>
-      <div class="win-sub">Press Restart to play again</div>
+      <div class="win-sub">PRESS RESTART TO PLAY AGAIN</div>
     </div>\`;
   document.body.appendChild(ov);
   spawnParticles(glow);
