@@ -40,7 +40,7 @@ app.post("/register", async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.json({ ok: false, msg: "Please fill in all fields" });
     const exists = await User.findOne({ username });
-    if (exists) return res.json({ ok: false, msg: "ชื่อนี้ถูกใช้แล้ว" });
+    if (exists) return res.json({ ok: false, msg: "This name is already in use" });
     const hash = await bcrypt.hash(password, 10);
     await User.create({ username, password: hash });
     res.json({ ok: true });
@@ -452,7 +452,7 @@ app.get("/", (req, res) => {
     <div class="field"><label>CONFIRM PASSWORD</label><input id="regPass2" type="password" placeholder="••••••"/></div>
     <button class="btn" onclick="doRegister()">CREATE ACCOUNT</button>
     <div class="msg" id="regMsg"></div>
-    <div class="switch-link">มีบัญชีแล้ว? <span onclick="showLogin()">เข้าสู่ระบบ</span></div>
+    <div class="switch-link">Already have an account? <span onclick="showLogin()">Log in</span></div>
   </div>
 </div>
 
@@ -465,23 +465,23 @@ app.get("/", (req, res) => {
     <div class="mode-card" onclick="selectMode(3,3)">
       <div class="mode-size">3×3</div>
       <div class="mode-label">CLASSIC</div>
-      <div class="mode-win">ชนะ 3 แถว</div>
+      <div class="mode-win">Win with 3 in a row</div>
     </div>
     <div class="mode-card" onclick="selectMode(9,5)">
       <div class="mode-size">9×9</div>
       <div class="mode-label">ADVANCED</div>
-      <div class="mode-win">ชนะ 5 แถว</div>
+      <div class="mode-win">Win with 5 in a row</div>
     </div>
     <div class="mode-card" onclick="selectMode(16,5)">
       <div class="mode-size">16×16</div>
       <div class="mode-label">EPIC</div>
-      <div class="mode-win">ชนะ 5 แถว</div>
+      <div class="mode-win">Win with 5 in a row</div>
     </div>
   </div>
 
   <div class="card" style="max-width:320px">
     <div class="card-title">— JOIN ROOM —</div>
-    <div class="field"><label>ROOM ID</label><input id="roomInput" placeholder="ใส่ชื่อห้อง"/></div>
+    <div class="field"><label>ROOM ID</label><input id="roomInput" placeholder="Enter a room name"/></div>
     <button class="btn" id="joinBtn" onclick="joinRoom()" disabled>JOIN / CREATE ROOM</button>
     <div class="msg" id="modeMsg"></div>
   </div>
