@@ -38,14 +38,14 @@ let rooms = {};
 app.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;
-    if (!username || !password) return res.json({ ok: false, msg: "กรุณากรอกข้อมูล" });
+    if (!username || !password) return res.json({ ok: false, msg: "Please fill in all fields" });
     const exists = await User.findOne({ username });
-    if (exists) return res.json({ ok: false, msg: "ชื่อนี้ถูกใช้แล้ว" });
+    if (exists) return res.json({ ok: false, msg: "Username already taken" });
     const hash = await bcrypt.hash(password, 10);
     await User.create({ username, password: hash });
     res.json({ ok: true });
   } catch (e) {
-    res.json({ ok: false, msg: "เกิดข้อผิดพลาด" });
+    res.json({ ok: false, msg: "An error occurred" });
   }
 });
 
@@ -53,13 +53,13 @@ app.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
-    if (!user) return res.json({ ok: false, msg: "ไม่พบผู้ใช้" });
+    if (!user) return res.json({ ok: false, msg: "User not found" });
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.json({ ok: false, msg: "รหัสผ่านไม่ถูกต้อง" });
+    if (!match) return res.json({ ok: false, msg: "Incorrect password" });
     req.session.user = username;
     res.json({ ok: true, username });
   } catch (e) {
-    res.json({ ok: false, msg: "เกิดข้อผิดพลาด" });
+    res.json({ ok: false, msg: "An error occurred" });
   }
 });
 
@@ -75,7 +75,7 @@ app.get("/me", (req, res) => {
 // ===== SERVE HTML =====
 app.get("/", (req, res) => {
   res.send(`<!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -425,64 +425,64 @@ app.get("/", (req, res) => {
 
 <!-- TOPBAR (hidden until logged in) -->
 <div class="topbar" id="topbar" style="display:none">
-  <div class="topbar-user">ผู้เล่น: <span id="topbarUser"></span></div>
-  <button class="btn sm o" onclick="logout()">LOGOUT</button>
+  <div class="topbar-user">Player: <span id="topbarUser"></span></div>
+  <button class="btn sm o" onclick="logout()">Log out</button>
 </div>
 
 <!-- ════ PAGE: LOGIN / REGISTER ════ -->
 <div class="page active" id="pageAuth">
   <div class="logo">XO ARENA</div>
-  <div class="tagline">MULTIPLAYER · REAL-TIME · STRATEGY</div>
+  <div class="tagline">Multiplayer · Real-time · Strategy</div>
 
   <!-- LOGIN FORM -->
   <div class="card" id="loginCard">
-    <div class="card-title">— SIGN IN —</div>
-    <div class="field"><label>USERNAME</label><input id="loginUser" placeholder="your_name"/></div>
-    <div class="field"><label>PASSWORD</label><input id="loginPass" type="password" placeholder="••••••"/></div>
-    <button class="btn" onclick="doLogin()">ENTER ARENA</button>
+    <div class="card-title">— Sign In —</div>
+    <div class="field"><label>Username</label><input id="loginUser" placeholder="your_name"/></div>
+    <div class="field"><label>Password</label><input id="loginPass" type="password" placeholder="••••••"/></div>
+    <button class="btn" onclick="doLogin()">Sign in</button>
     <div class="msg" id="loginMsg"></div>
-    <div class="switch-link">ยังไม่มีบัญชี? <span onclick="showRegister()">สมัครสมาชิก</span></div>
+    <div class="switch-link">No account yet? <span onclick="showRegister()">Register here</span></div>
   </div>
 
   <!-- REGISTER FORM -->
   <div class="card" id="registerCard" style="display:none">
-    <div class="card-title">— REGISTER —</div>
-    <div class="field"><label>USERNAME</label><input id="regUser" placeholder="your_name"/></div>
-    <div class="field"><label>PASSWORD</label><input id="regPass" type="password" placeholder="••••••"/></div>
-    <div class="field"><label>CONFIRM PASSWORD</label><input id="regPass2" type="password" placeholder="••••••"/></div>
-    <button class="btn" onclick="doRegister()">CREATE ACCOUNT</button>
+    <div class="card-title">— Create Account —</div>
+    <div class="field"><label>Username</label><input id="regUser" placeholder="your_name"/></div>
+    <div class="field"><label>Password</label><input id="regPass" type="password" placeholder="••••••"/></div>
+    <div class="field"><label>Confirm password</label><input id="regPass2" type="password" placeholder="••••••"/></div>
+    <button class="btn" onclick="doRegister()">Create account</button>
     <div class="msg" id="regMsg"></div>
-    <div class="switch-link">มีบัญชีแล้ว? <span onclick="showLogin()">เข้าสู่ระบบ</span></div>
+    <div class="switch-link">Already have an account? <span onclick="showLogin()">Sign in</span></div>
   </div>
 </div>
 
 <!-- ════ PAGE: MODE SELECT ════ -->
 <div class="page" id="pageMode" style="padding-top:64px">
   <div class="logo">XO ARENA</div>
-  <div class="tagline">SELECT YOUR BATTLEFIELD</div>
+  <div class="tagline">Select your battlefield</div>
 
   <div class="mode-grid">
     <div class="mode-card" onclick="selectMode(3,3)">
       <div class="mode-size">3×3</div>
-      <div class="mode-label">CLASSIC</div>
-      <div class="mode-win">ชนะ 3 แถว</div>
+      <div class="mode-label">Classic</div>
+      <div class="mode-win">Win in 3</div>
     </div>
     <div class="mode-card" onclick="selectMode(9,5)">
       <div class="mode-size">9×9</div>
-      <div class="mode-label">ADVANCED</div>
-      <div class="mode-win">ชนะ 5 แถว</div>
+      <div class="mode-label">Advanced</div>
+      <div class="mode-win">Win in 5</div>
     </div>
     <div class="mode-card" onclick="selectMode(16,5)">
       <div class="mode-size">16×16</div>
-      <div class="mode-label">EPIC</div>
-      <div class="mode-win">ชนะ 5 แถว</div>
+      <div class="mode-label">Epic</div>
+      <div class="mode-win">Win in 5</div>
     </div>
   </div>
 
   <div class="card" style="max-width:320px">
-    <div class="card-title">— JOIN ROOM —</div>
-    <div class="field"><label>ROOM ID</label><input id="roomInput" placeholder="ใส่ชื่อห้อง"/></div>
-    <button class="btn" id="joinBtn" onclick="joinRoom()" disabled>JOIN / CREATE ROOM</button>
+    <div class="card-title">— Join a Room —</div>
+    <div class="field"><label>Room name</label><input id="roomInput" placeholder="Enter room name"/></div>
+    <button class="btn" id="joinBtn" onclick="joinRoom()" disabled>Join / Create room</button>
     <div class="msg" id="modeMsg"></div>
   </div>
 
@@ -493,25 +493,25 @@ app.get("/", (req, res) => {
 <div class="page" id="pageGame" style="padding-top:64px">
 
   <div class="lobby-info">
-    <div class="chip">ห้อง: <span id="roomLabel"></span></div>
-    <div class="chip">โหมด: <span id="modeLabel"></span></div>
-    <div class="chip">คุณคือ: <span id="symbolLabel"></span></div>
+    <div class="chip">Room: <span id="roomLabel"></span></div>
+    <div class="chip">Mode: <span id="modeLabel"></span></div>
+    <div class="chip">You are: <span id="symbolLabel"></span></div>
   </div>
 
-  <div id="status">WAITING FOR OPPONENT...</div>
+  <div id="status">Waiting for opponent...</div>
 
   <div id="boardWrapper">
     <div id="board"></div>
   </div>
 
   <div id="expandPanel" style="display:none">
-    <div class="expand-title">⚠ BOARD FULL — CHOOSE EXPANSION DIRECTION</div>
+    <div class="expand-title">⚠ Board is full — Choose a direction to expand</div>
     <div class="expand-btns" id="expandBtns"></div>
   </div>
 
   <div class="game-controls">
-    <button class="btn sm o" onclick="goBack()">← BACK</button>
-    <button class="btn sm gold" onclick="restartGame()">RESTART</button>
+    <button class="btn sm o" onclick="goBack()">← Back</button>
+    <button class="btn sm gold" onclick="restartGame()">Restart</button>
   </div>
 
   <div id="scoreBoard2" style="margin-top:12px; background:var(--surf2); border:1px solid var(--border); border-radius:8px; padding:12px 20px; font-size:0.8rem; line-height:2; min-width:180px; text-align:center; color:var(--dim);">
@@ -553,7 +553,7 @@ async function doLogin() {
   const username = document.getElementById("loginUser").value.trim();
   const password = document.getElementById("loginPass").value;
   const msg = document.getElementById("loginMsg");
-  if (!username||!password) return setMsg(msg,"กรุณากรอกข้อมูล","err");
+  if (!username||!password) return setMsg(msg,"Please fill in all fields","err");
   const r = await fetch("/login",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({username,password}) });
   const d = await r.json();
   if (d.ok) {
@@ -571,12 +571,12 @@ async function doRegister() {
   const password = document.getElementById("regPass").value;
   const password2 = document.getElementById("regPass2").value;
   const msg = document.getElementById("regMsg");
-  if (!username||!password) return setMsg(msg,"กรุณากรอกข้อมูล","err");
-  if (password !== password2) return setMsg(msg,"รหัสผ่านไม่ตรงกัน","err");
+  if (!username||!password) return setMsg(msg,"Please fill in all fields","err");
+  if (password !== password2) return setMsg(msg,"Passwords do not match","err");
   const r = await fetch("/register",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({username,password}) });
   const d = await r.json();
   if (d.ok) {
-    setMsg(msg,"สมัครสำเร็จ! เข้าสู่ระบบได้เลย","ok");
+    setMsg(msg,"Account created! You can now sign in.","ok");
     setTimeout(showLogin, 1500);
   } else {
     setMsg(msg, d.msg, "err");
@@ -600,12 +600,12 @@ function selectMode(size, win) {
   document.querySelectorAll(".mode-card").forEach(c => c.style.borderColor = "");
   event.currentTarget.style.borderColor = "var(--x)";
   document.getElementById("joinBtn").disabled = false;
-  setMsg(document.getElementById("modeMsg"), \`เลือก \${size}×\${size} — ชนะ \${win} แถว\`, "ok");
+  setMsg(document.getElementById("modeMsg"), `Selected ${size}×${size} — Win in ${win}`, "ok");
 }
 
 function joinRoom() {
   room = document.getElementById("roomInput").value.trim();
-  if (!room) return setMsg(document.getElementById("modeMsg"),"กรุณาใส่ชื่อห้อง","err");
+  if (!room) return setMsg(document.getElementById("modeMsg"),"Please enter a room name","err");
   boardSize = selectedSize;
   winLen    = selectedWin;
   socket.emit("joinRoom", { room, boardSize, winLen, username: myUser });
@@ -640,7 +640,7 @@ socket.on("start", (data) => {
 
   showPage("pageGame");
   document.getElementById("expandPanel").style.display = "none";
-  setStatus("YOUR TURN");
+  setStatus("Your turn");
   draw();
 });
 
@@ -649,7 +649,7 @@ socket.on("play", (d) => {
   current = d.s === "X" ? "O" : "X";
   drawWithPop(d.i);
   check();
-  if (!gameOver) setStatus("YOUR TURN");
+  if (!gameOver) setStatus("Your turn");
 });
 
 socket.on("expand", (data) => {
@@ -661,7 +661,7 @@ socket.on("expand", (data) => {
   document.getElementById("expandPanel").style.display = "none";
   document.getElementById("modeLabel").textContent = \`\${boardSize}×\${boardSize}\`;
   draw();
-  setStatus(current === mySymbol ? "YOUR TURN" : "OPPONENT'S TURN");
+  setStatus(current === mySymbol ? "Your turn" : "Opponent's turn");
 });
 
 socket.on("restart", () => {
@@ -672,7 +672,7 @@ socket.on("restart", () => {
   document.getElementById("expandPanel").style.display = "none";
   document.getElementById("winOverlay")?.remove();
   document.getElementById("drawOverlay")?.remove();
-  setStatus("YOUR TURN");
+  setStatus("Your turn");
   draw();
 });
 
@@ -687,7 +687,7 @@ function play(i) {
   socket.emit("play", { room, i, s: mySymbol });
   drawWithPop(i);
   check();
-  if (!gameOver) setStatus("OPPONENT'S TURN");
+  if (!gameOver) setStatus("Opponent's turn");
 }
 
 // ── DRAW ──
@@ -777,7 +777,7 @@ function check() {
     } else {
       waitingExpand = true;
       gameOver = false;
-      setStatus("OPPONENT IS CHOOSING EXPANSION...");
+      setStatus("Opponent is choosing how to expand...");
     }
   }
 }
@@ -789,24 +789,24 @@ function showExpandPanel() {
   panel.style.display = "";
 
   const directions = [
-    { label:"↑ ขยายบน",    dir:"top"    },
-    { label:"↓ ขยายล่าง",  dir:"bottom" },
-    { label:"← ขยายซ้าย",  dir:"left"   },
-    { label:"→ ขยายขวา",   dir:"right"  },
-    { label:"↕↔ ขยายทุกด้าน", dir:"all" },
+    { label:"↑ Expand top",    dir:"top"    },
+    { label:"↓ Expand bottom", dir:"bottom" },
+    { label:"← Expand left",   dir:"left"   },
+    { label:"→ Expand right",  dir:"right"  },
+    { label:"↕↔ Expand all sides", dir:"all" },
   ];
 
   btns.innerHTML = directions.map(d =>
-    \`<button class="btn sm gold" onclick="expand('\${d.dir}')">\${d.label}</button>\`
+    `<button class="btn sm gold" onclick="expand('${d.dir}')">${d.label}</button>`
   ).join("");
 
-  setStatus("เลือกทิศทางขยายตาราง");
+  setStatus("Choose a direction to expand the board");
 }
 
 function expand(dir) {
   socket.emit("expand", { room, dir, boardSize, board });
   document.getElementById("expandPanel").style.display = "none";
-  setStatus("EXPANDING...");
+  setStatus("Expanding board...");
 }
 
 // ── WIN HIGHLIGHT ──
@@ -829,7 +829,7 @@ function showWinOverlay(winner) {
       <div class="particles" id="pCont"></div>
       <div class="win-symbol" style="color:\${color};text-shadow:0 0 30px \${glow},0 0 60px \${glow}40">\${winner}</div>
       <div class="win-label">WINS!</div>
-      <div class="win-sub">PRESS RESTART TO PLAY AGAIN</div>
+      <div class="win-sub">Press Restart to play again</div>
     </div>\`;
   document.body.appendChild(ov);
   spawnParticles(glow);
